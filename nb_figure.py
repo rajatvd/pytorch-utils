@@ -10,7 +10,7 @@ class NBFigure():
     """An extension of matplotlib figure to work with jupyter notebook's display module.
     Works by storing the figure as an image on disk and loading it to display on updating.
     """
-    def __init__(self,image_path,nrows=1,ncols=1,**subplot_kwargs):
+    def __init__(self,image_path,nrows=1,ncols=1,decorate_fn=None,**subplot_kwargs):
         """
         image_path: the filename of the stored figure image
         
@@ -22,7 +22,12 @@ class NBFigure():
         self.fig, self.axes = plt.subplots(nrows,ncols,**subplot_kwargs)
         
         self.axes=self.axes.reshape(nrows,ncols)
+        
+        if decorate_fn != None:
+            decorate_fn(self.axes)
+        
         plt.close(self.fig)
+        
         
         self.image_path = image_path
         self.fig.savefig(image_path, bbox_inches='tight')
@@ -33,7 +38,7 @@ class NBFigure():
         
     def update_lims(self):
         """
-        Updates xlims
+        Updates lims of all axes
         """
         for i in range(self.nrows):
             for j in range(self.ncols):
@@ -44,18 +49,23 @@ class NBFigure():
                 ax.set_ylim(self.ylims[i][j])
                 
     def set_xlim(self,xlim,row=0,col=0):
+        """Set the xlims of the axes indexed by row and col, starting from 0.
+        Effect will be visible only after update."""
         self.xlims[row][col]=xlim
 
     def set_ylim(self,ylim,row=0,col=0):
+        """Set the ylims of the axes indexed by row and col, starting from 0.
+        Effect will be visible only after update."""
         self.ylims[row][col]=ylim
         
     def display(self):
         """Create a new display of the figure"""
         self.disp = display(Image(self.image_path),display_id=str(id(self)))
     
-    def update(self):
-        """Update the lims and update all display instances"""
-        self.update_lims()
+    def update(self, update_lims=True):
+        """Update the lims(if set to True) and update all display instances"""
+        if update_lims:
+            self.update_lims()
         self.fig.savefig(self.image_path, bbox_inches='tight')
         self.disp.update(Image(self.image_path))
         
