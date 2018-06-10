@@ -9,7 +9,7 @@ import torch.nn as nn
 import torch.nn.utils.rnn as utils
 
 class WrappedLSTM(nn.Module):
-    def __init__(self, lstm_input_size, lstm_hidden_size, input_module=None, output_module=None):
+    def __init__(self, lstm_input_size, lstm_hidden_size, input_module=None, output_module=None, num_layers=1):
         """
         lstm_input_size should equal input_module output size
         lstm_hidden_size should equal output_module input size
@@ -19,7 +19,7 @@ class WrappedLSTM(nn.Module):
         self.input_module = input_module
         self.output_module = output_module
         
-        self.lstm = nn.LSTM(input_size=lstm_input_size,hidden_size=lstm_hidden_size)
+        self.lstm = nn.LSTM(input_size=lstm_input_size,hidden_size=lstm_hidden_size, num_layers=num_layers)
         
     def forward(self,hidden, *packed_input):
         """
