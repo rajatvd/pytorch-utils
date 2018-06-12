@@ -145,7 +145,6 @@ def trainLoop(model, train_loader, optimizer, trainOnBatch, epochs=10,
                 
     except KeyboardInterrupt:
         print("KeyboardInterrupt occured, saving raw model and losses")
-    finally:
         # save raw model
         torch.save(model,
               os.path.join(
@@ -165,3 +164,5 @@ def trainLoop(model, train_loader, optimizer, trainOnBatch, epochs=10,
               )
         
         return losses
+    
+    return losses
