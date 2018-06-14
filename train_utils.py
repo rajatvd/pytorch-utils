@@ -83,13 +83,13 @@ def trainLoop(model, train_loader, optimizer, trainOnBatch, epochs=10,
     loss_plot.set_xlim((1,None)) # epochs start from 1
     loss_plot.set_ylim((0,None)) # 0 is min loss
     loss_plot.display()
-    loss_line = loss_plot.plotLine([0],[0])
+    loss_line, = loss_plot.getAxis().plot([0],[0])
 
-    """Main train loop"""
     
+    
+    """Main train loop"""
     losses = []
     loss=0
-    
     try:
         for e in range(epochs):
             

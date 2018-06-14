@@ -44,6 +44,7 @@ class NBFigure():
             for j in range(self.ncols):
                 ax = self.axes[i][j]
                 ax.relim()
+#                 ax.autoscale_view()
                 ax.autoscale()
                 ax.set_xlim(self.xlims[i][j])
                 ax.set_ylim(self.ylims[i][j])
@@ -72,10 +73,9 @@ class NBFigure():
             self.update_lims()
         self.fig.savefig(self.image_path, bbox_inches='tight')
         self.disp.update(Image(self.image_path))
-        
-    def plotLine(self,x,y,axis_num=0,**plot_kwargs):
-        """Plot a line and return the Line2D object"""
+    
+    def getAxis(self,axis_num=0):
+        """Get the axis in the subplot indexed row major wise starting from 0."""
         row = axis_num//self.ncols
         col = axis_num%self.ncols
-        l,= self.axes[row][col].plot(x,y,**plot_kwargs)
-        return l
+        return self.axes[row][col]
