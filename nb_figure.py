@@ -48,14 +48,18 @@ class NBFigure():
                 ax.set_xlim(self.xlims[i][j])
                 ax.set_ylim(self.ylims[i][j])
                 
-    def set_xlim(self,xlim,row=0,col=0):
-        """Set the xlims of the axes indexed by row and col, starting from 0.
+    def set_xlim(self,xlim,axis_num=0):
+        """Set the xlims of the axes indexed row major wise starting from 0.
         Effect will be visible only after update."""
+        row = axis_num//self.ncols
+        col = axis_num%self.ncols
         self.xlims[row][col]=xlim
 
-    def set_ylim(self,ylim,row=0,col=0):
-        """Set the ylims of the axes indexed by row and col, starting from 0.
+    def set_ylim(self,ylim,axis_num=0):
+        """Set the ylims of the axes indexed row major wise, starting from 0.
         Effect will be visible only after update."""
+        row = axis_num//self.ncols
+        col = axis_num%self.ncols
         self.ylims[row][col]=ylim
         
     def display(self):
@@ -69,7 +73,9 @@ class NBFigure():
         self.fig.savefig(self.image_path, bbox_inches='tight')
         self.disp.update(Image(self.image_path))
         
-    def plotLine(self,x,y,row=0,col=0,**plot_kwargs):
+    def plotLine(self,x,y,axis_num=0,**plot_kwargs):
         """Plot a line and return the Line2D object"""
+        row = axis_num//self.ncols
+        col = axis_num%self.ncols
         l,= self.axes[row][col].plot(x,y,**plot_kwargs)
         return l
