@@ -332,7 +332,7 @@ class Trainer():
             return self.metrics
 
 def accuracy(scores, labels):
-    
+    """Return accuracy percentage. Assumes scores are in dim -1."""
     with torch.no_grad():
         total = scores.size()[0]
         pred = torch.argmax(scores, dim=-1)

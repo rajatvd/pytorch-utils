@@ -10,6 +10,6 @@ Currently contains:
 * __WrappedLSTM__ :  a pytorch nn Module which wraps an input and output module around an lstm. The whole module now works solely with packed sequences, and padding is not required.
 
 ## Train utils
-Contains a train loop util which can be called with a model, DataLoader, optimizer and a trainOnBatch function to train a model for a given number of epochs. Automatically saves the model, displays a live animated loss plot, and a progress bar for each epoch.
+Contains a Trainer class. It can be used to call a train loop with a model, DataLoader, optimizer, atrainOnBatch function and an epoch callback function to train a model for a given number of epochs. Automatically saves the model, displays a live animated metric plot, and a progress bar for each epoch.
 
 ![Example of the train loop util](train_util_example.PNG)
