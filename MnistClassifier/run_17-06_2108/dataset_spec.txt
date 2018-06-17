@@ -1,8 +1,0 @@
-Train dataset:
-Dataset MNIST
-    Number of datapoints: 60000
-    Split: train
-    Root Location: /MNIST
-    Transforms (if any): ToTensor()
-    Target Transforms (if any): None
-batch size = 32

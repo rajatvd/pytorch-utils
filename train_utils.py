@@ -306,7 +306,7 @@ class Trainer():
                     else:
                         print(toprint)
 
-        except KeyboardInterrupt:
+        except:
             print("Exception occured, saving model and metrics")
             traceback.print_exc()
         finally:
@@ -330,3 +330,12 @@ class Trainer():
                   )
             
             return self.metrics
+
+def accuracy(scores, labels):
+    
+    with torch.no_grad():
+        total = scores.size()[0]
+        pred = torch.argmax(scores, dim=-1)
+        correct = (pred == labels).sum().cpu().numpy().astype('float32')
+        acc = correct/total * 100
+        return acc

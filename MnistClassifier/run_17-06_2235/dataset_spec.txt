@@ -1,0 +1,5 @@
+Train dataset:
+<torch.utils.data.dataset.Subset object at 0x000001E611A45780>
+batch size = 32
+Validation dataset:
+<torch.utils.data.dataset.Subset object at 0x000001E611A45860>
