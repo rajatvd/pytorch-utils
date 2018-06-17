@@ -1,0 +1,4 @@
+MnistClassifier(
+  (hidden_layer): Linear(in_features=784, out_features=400, bias=True)
+  (output_layer): Linear(in_features=400, out_features=10, bias=True)
+)
