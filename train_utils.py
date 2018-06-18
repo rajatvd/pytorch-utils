@@ -13,6 +13,7 @@ from IPython.display import *
 from nb_figure import *
 import os, time
 import traceback
+from updaters import *
 
 def getTimeName():
     """Return the current time in format <day>-<month>_<hour><minute> for use in filenames."""
@@ -129,7 +130,7 @@ class Trainer():
         self.nbfig.display()
         self.nbfig.update()
 
-    def setup_metrics(self,batch_metric_names, callback_metric_names=[], 
+    def setup_metrics(self,batch_metric_names, callback_metric_names=[], batch_metric_updaters=None,
                     plot_grouping=None, save_name_metrics=None, fig_grid=(1,1)):
         """
         Setup the metrics dict, with the given names for the metrics returned
@@ -142,6 +143,9 @@ class Trainer():
             in order
         callback_metric_names(=[]): names of the metrics returned by the callback function, 
             in order
+        batch_metric_updaters(=None): A list of updaters for each of the batch metrics. The running 
+            metric is displayed in the epoch update bar and is also stored. By default is the 
+            'Latest' updater.
         plot_grouping(=None): a list of lists. Each list should contain the names of metrics to be 
             plotted in a single subplot. The index of each list corresponds to the index of
             the subplot, counted row major wise.
@@ -157,6 +161,11 @@ class Trainer():
         self.callback_metric_names = callback_metric_names
         self.metric_names = self.batch_metric_names+self.callback_metric_names
         self.save_name_metrics = save_name_metrics if save_name_metrics != None else []
+        
+        if batch_metric_updaters != None:
+            self.updaters = batch_metric_updaters
+        else:
+            self.updaters = [Latest() for m in self.batch_metric_names]
         
         # group all metrics into one if plot_grouping not specified
         if plot_grouping != None:
@@ -193,16 +202,20 @@ class Trainer():
         
         First, the optimizer and dataset specs are saved in a run directory.
         
-        trainOnBatch is called for each batch in train loader, and the batch metrics of the last
-        batch are recorded.
+        For each epoch:
         
-        callback is called after each epoch and the metrics it returned are also recorded.
-        
-        Plots of all metrics are updated live.
-        
+            trainOnBatch is called for each batch in train loader, and the running batch metrics 
+            are updated using the given updaters in setup_metrics. The final resulting metrics are 
+            recorded.
+
+            callback is called after each epoch with the model and val_loader as inputs
+            and the metrics it returns are also recorded.
+
+            Plots of all metrics are updated live.
+
         Finally, model and optimzer state dicts are saved.
         
-        Returns a dictionary of metrics
+        Returns a dictionary containing the history of all recorded metrics.
         
         ---------
         Arguments
@@ -238,9 +251,15 @@ class Trainer():
                 i=0
                 start = time.time()
 
+                # Reset running metrics
+                [updater.reset() for updater in self.updaters]
+                
                 for batch in train_loader:
                     # Perform train step
                     batch_metrics = trainOnBatch(self.model, batch, optimizer)
+                    
+                    # Update running metrics
+                    batch_metrics = tuple([self.updaters[i].update(b_metric) for i,b_metric in enumerate(batch_metrics)])
                     
                     # Update displays
                     i+=1
