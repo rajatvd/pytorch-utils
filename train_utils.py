@@ -27,6 +27,15 @@ def save_as_txt(obj, filename):
     with open(filename, 'w') as f:
         f.write(s)
 
+def accuracy(scores, labels):
+    """Return accuracy percentage. Assumes scores are in dim -1."""
+    with torch.no_grad():
+        total = scores.size()[0]
+        pred = torch.argmax(scores, dim=-1)
+        correct = (pred == labels).sum().cpu().numpy().astype('float32')
+        acc = correct/total * 100
+        return acc
+
 def decorate_plot(axes):
     """Label x axis as Epoch for each axis"""
     for ax in axes.reshape(-1):
@@ -130,8 +139,13 @@ class Trainer():
         self.nbfig.display()
         self.nbfig.update()
 
-    def setup_metrics(self,batch_metric_names, callback_metric_names=[], batch_metric_updaters=None,
-                    plot_grouping=None, save_name_metrics=None, fig_grid=(1,1)):
+    def setup_metrics(self,
+                      batch_metric_names, 
+                      callback_metric_names=[], 
+                      batch_metric_updaters=None,
+                      save_name_metrics=None, 
+                      fig_grid=(1,1),
+                      plot_grouping=None):
         """
         Setup the metrics dict, with the given names for the metrics returned
         by the batch and callback functions. 
@@ -349,12 +363,3 @@ class Trainer():
                   )
             
             return self.metrics
-
-def accuracy(scores, labels):
-    """Return accuracy percentage. Assumes scores are in dim -1."""
-    with torch.no_grad():
-        total = scores.size()[0]
-        pred = torch.argmax(scores, dim=-1)
-        correct = (pred == labels).sum().cpu().numpy().astype('float32')
-        acc = correct/total * 100
-        return acc
