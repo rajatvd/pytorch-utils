@@ -241,7 +241,9 @@ class Trainer():
         update_interval: number of batches to update displays after
         save_every: number of epochs after which to save model state dict
         """
-        
+        for metric in self.metric_names:
+            self.metrics[metric] = []
+            
         run_dir = os.path.join(self.save_dir,"run_{}".format(getTimeName()))
         os.makedirs(run_dir,exist_ok=True)
         
@@ -270,10 +272,11 @@ class Trainer():
                 
                 for batch in train_loader:
                     # Perform train step
-                    batch_metrics = trainOnBatch(self.model, batch, optimizer)
+                    batch_metrics = self.trainOnBatch(self.model, batch, optimizer)
                     
                     # Update running metrics
-                    batch_metrics = tuple([self.updaters[i].update(b_metric) for i,b_metric in enumerate(batch_metrics)])
+                    batch_metrics = tuple([self.updaters[i].update(b_metric) 
+                                           for i,b_metric in enumerate(batch_metrics)])
                     
                     # Update displays
                     i+=1
