@@ -347,7 +347,7 @@ class Trainer():
             traceback.print_exc()
         finally:
             # save model dict
-            self.save_model(e+1, run_dir)
+            self.save_model(e, run_dir)
             
             # save metrics
             torch.save(self.metrics,
