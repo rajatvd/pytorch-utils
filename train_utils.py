@@ -82,6 +82,7 @@ class Trainer():
         self.callback = callback
         self.mode = mode
         self.model = model
+        self.has_displays = False
         
         # save model architecture
         save_as_txt(self.model, os.path.join(self.save_dir, 'arch.txt'))
@@ -107,25 +108,28 @@ class Trainer():
         batches: the number of batches in an epoch
         directory: the directory to save the metrics plot image
         """
+
+        unique = str(time.time()) # string to make display ids unique
+        
         # First line display
-        self.batch_info = display(Markdown(''), display_id='batch_info')
+        self.batch_info = display(Markdown(''), display_id='batch_info'+unique)
 
         # Progress bar
         self.epoch_progress = ProgressBar(batches)
-        self.progress_bar = display(self.epoch_progress,display_id='progress_bar')
+        self.progress_bar = display(self.epoch_progress,display_id='progress_bar'+unique)
 
         # Time of last epoch display
-        self.time_info = display(Markdown(''), display_id='time_info')
+        self.time_info = display(Markdown(''), display_id='time_info'+unique)
 
-        self.callback_info = display(Markdown(''), display_id='callback_info')
-        
+        self.callback_info = display(Markdown(''), display_id='callback_info'+unique)
+
         # Last saved model
-        self.checkpoint_info = display(Markdown(''), display_id='checkpoint_info')
-        
+        self.checkpoint_info = display(Markdown(''), display_id='checkpoint_info'+unique)
+
         # Metric plots
         self.nbfig = NBFigure(os.path.join(directory,"metric_plots.png")
                               ,*self.fig_grid, decorate_plot, **subplot_kwargs)
-        
+
         # setup lines 
         self.lines = {}
         for i,group in enumerate(self.plot_grouping):
@@ -135,8 +139,11 @@ class Trainer():
                 self.lines[metric], = ax.plot([0],[0])
 
             ax.legend(group)
-            
+
         self.nbfig.display()
+        
+        self.has_displays = True
+        
         self.nbfig.update()
 
     def setup_metrics(self,
@@ -210,7 +217,15 @@ class Trainer():
             
         self.nbfig.update()
         
-    def loop(self, epochs, train_loader, optimizer, val_loader=None, update_interval=10, save_every=1):
+    def loop(self, 
+             epochs, 
+             train_loader, 
+             optimizer, 
+             val_loader=None, 
+             update_interval=10, 
+             save_every=1, 
+             old_metrics=None, 
+             new_displays = False):
         """
         Perform a train loop for the given number of epochs.
         
@@ -241,14 +256,21 @@ class Trainer():
         update_interval: number of batches to update displays after
         save_every: number of epochs after which to save model state dict
         """
+        
+        # setup metrics store
         for metric in self.metric_names:
-            self.metrics[metric] = []
+            self.metrics[metric] = [] if old_metrics==None else old_metrics[metric][:]
             
+        start_epoch = 0 if old_metrics==None else len(list(old_metrics.values())[0])
+            
+        # directory to save stuff
         run_dir = os.path.join(self.save_dir,"run_{}".format(getTimeName()))
         os.makedirs(run_dir,exist_ok=True)
         
+        # display setup
         if self.mode == 'nb':
-            self.setup_displays(len(train_loader), run_dir)
+            if (self.has_displays == False) or (new_displays == True):
+                self.setup_displays(len(train_loader), run_dir)
         
         # save optimizer spec
         save_as_txt(optimizer, os.path.join(run_dir,"optimizer_spec.txt"))
@@ -262,7 +284,7 @@ class Trainer():
         
         # main train loop
         try:
-            for e in range(epochs):
+            for e in range(start_epoch,start_epoch+epochs,1):
 
                 i=0
                 start = time.time()
