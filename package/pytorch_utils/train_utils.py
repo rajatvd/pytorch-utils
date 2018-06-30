@@ -10,10 +10,10 @@ from torch import optim
 from pylab import *
 from torch.utils.data import *
 from IPython.display import *
-from nb_figure import *
+from pytorch_utils.nb_figure import *
 import os, time
 import traceback
-from updaters import *
+from pytorch_utils.updaters import *
 
 def getTimeName():
     """Return the current time in format <day>-<month>_<hour><minute> for use in filenames."""
