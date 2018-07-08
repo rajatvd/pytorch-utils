@@ -184,9 +184,9 @@ class Trainer():
         self.save_name_metrics = save_name_metrics if save_name_metrics != None else []
         
         if batch_metric_updaters != None:
-            self.updaters = batch_metric_updaters
+            self.updater_funcs = batch_metric_updaters
         else:
-            self.updaters = [Latest() for m in self.batch_metric_names]
+            self.updater_funcs = [latest for m in self.batch_metric_names]
         
         # group all metrics into one if plot_grouping not specified
         if plot_grouping != None:
@@ -290,14 +290,15 @@ class Trainer():
                 start = time.time()
 
                 # Reset running metrics
-                [updater.reset() for updater in self.updaters]
+                updaters = [updater() for updater in self.updater_funcs]
+                [next(u) for u in updaters]
                 
                 for batch in train_loader:
                     # Perform train step
                     batch_metrics = self.trainOnBatch(self.model, batch, optimizer)
                     
                     # Update running metrics
-                    batch_metrics = tuple([self.updaters[i].update(b_metric) 
+                    batch_metrics = tuple([updaters[i].send(b_metric) 
                                            for i,b_metric in enumerate(batch_metrics)])
                     
                     # Update displays
