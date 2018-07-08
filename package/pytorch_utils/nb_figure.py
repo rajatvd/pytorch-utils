@@ -5,6 +5,7 @@ Figures are displayed as loaded images using IPython display."""
 import matplotlib.pyplot as plt
 from IPython.display import *
 import numpy as np
+import time
 
 class NBFigure():
     """An extension of matplotlib figure to work with jupyter notebook's display module.
@@ -79,7 +80,7 @@ class NBFigure():
         
     def display(self):
         """Create a display of the figure"""
-        self.disp = display(Image(self.image_path),display_id=str(id(self)))
+        self.disp = display(Image(self.image_path),display_id=f"{id(self)}_{time.time()}")
     
     def update(self, update_lims=True):
         """Update the lims(if set to True) and update all display instances"""

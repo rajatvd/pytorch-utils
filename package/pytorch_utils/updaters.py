@@ -15,7 +15,7 @@ def maxxer():
         x = yield running_max
         running_max = max(running_max, x)
 
-def maxxer():
+def minner():
     """A running updater which takes min of the metric"""
     running_min = yield
     while True:
