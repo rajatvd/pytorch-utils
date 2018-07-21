@@ -68,7 +68,7 @@ class Trainer():
         callback: a function with the following signature:
             callback(model, val_loader) -> tuple of callback metrics(scalars)
         save_dir: the name of the directory to save all runs of this trainer in,
-            if not provided, is the name of the model class
+            if not provided, it is the name of the model class
         mode: if 'nb', plot metric graphs and update displays, else just print info messages
         """
         
@@ -92,7 +92,7 @@ class Trainer():
         """Save the state dict of the model in the directory, 
         with the save name metrics at the given epoch."""
         # save state dict
-        filename = "{}_epoch{:03d}".format(getTimeName(),epoch)
+        filename = f"epoch{epoch:03d}_{getTimeName()}"
         
         for save_name_metric in self.save_name_metrics:
             filename = filename+"_{}{:.5f}".format(save_name_metric,
@@ -225,7 +225,7 @@ class Trainer():
              update_interval=10, 
              save_every=1, 
              old_metrics=None, 
-             new_displays = False):
+             new_displays=True):
         """
         Perform a train loop for the given number of epochs.
         
@@ -255,6 +255,9 @@ class Trainer():
         val_loader(optional): fed into callback as a keyword argument val_loader
         update_interval: number of batches to update displays after
         save_every: number of epochs after which to save model state dict
+        old_metrics: old set of metrics to continue training from. This affects model save names
+            (epoch number) and plots.
+        new_displays: whether to create a set of displays with new ids or reuse old ones
         """
         
         # setup metrics store
@@ -369,8 +372,6 @@ class Trainer():
             print("Exception occured, saving model and metrics")
             traceback.print_exc()
         finally:
-            # save model dict
-            self.save_model(e, run_dir)
             
             # save metrics
             torch.save(self.metrics,
@@ -387,5 +388,8 @@ class Trainer():
                         "optimizer_state_epoch{:03d}.statedict".format(e+1)
                     )
                   )
+            
+            # save model dict
+            self.save_model(e, run_dir)
             
             return self.metrics
