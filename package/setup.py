@@ -6,7 +6,7 @@ Designed to be used in a jupyter notebook workflow.
 """
 
 setup(name='pytorch_utils',
-		version='0.1',
+		version='0.2',
 		description='Utilities for training and building models in pytorch',
 		long_description=long_description,
 		author='Rajat Vadiraj Dwaraknath',
