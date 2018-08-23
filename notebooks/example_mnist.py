@@ -20,8 +20,8 @@ except:
 
 ex = Experiment('mnistclassifier_example', interactive=IPY)
 save_dir = 'MnistClassifier'
-ex.observers.append(FileStorageObserver.create(save_dir))
 ex.observers.append(VisdomObserver())
+ex.observers.append(FileStorageObserver.create(save_dir))
 
 @ex.config
 def dataset_config():
@@ -53,8 +53,8 @@ def make_dataloaders(val_split, batch_size):
 
 @ex.config
 def model_config():
-    hidden_size = 400
-    output_size = 10
+    hidden_size = 400 # hidden units in hidden layer
+    output_size = 10 # number of output labels
 
 class MnistClassifier(nn.Module):
     """A simple two layer fully connected neural network"""
@@ -81,8 +81,8 @@ def make_model(hidden_size, output_size):
 
 @ex.config
 def optimizer_config():
-    lr=0.001 
-    weight_decay=0
+    lr=0.001 # learning rate
+    weight_decay=0 # l2 regularization factor
     
 @ex.capture
 def make_optimizer(model, lr, weight_decay):
@@ -134,7 +134,7 @@ def classification_callback(model, val_loader):
 @ex.config
 def train_config():
     epochs=10
-    save_every=1
+    save_every=1 # epoch interval with which to save models
 
 @ex.command
 def train(_run):
