@@ -66,6 +66,7 @@ def loop(_run,
      epochs=10,
      save_every=1,
      start_epoch=1,
+
      **kwargs,
     ):
     """
@@ -124,7 +125,8 @@ def loop(_run,
             if callback != None:
                 callback_metrics = callback(model, val_loader=val_loader)
 
-            mets = dict(zip(callback_metric_names, callback_metrics))
+            mets = {**dict(zip(callback_metric_names, callback_metrics)),
+                **dict(zip(batch_metric_names, batch_metrics))}
 
             if len(callback_metrics)!=0:
                 cb_info = "Callback metrics: " + " ".join([f"{name}={val:.6f}"
