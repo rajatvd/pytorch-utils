@@ -24,3 +24,4 @@ Contains a Trainer class. It can be used to call a train loop with a model, Data
 ## Todo
 
 - [ ] Save best models to allow for easy reloading
+- [ ] Make it easy to continue a run from a previous model checkpoint
