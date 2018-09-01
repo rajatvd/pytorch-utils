@@ -20,3 +20,7 @@ Currently contains:
 Contains a Trainer class. It can be used to call a train loop with a model, DataLoader, optimizer, atrainOnBatch function and an epoch callback function to train a model for a given number of epochs. Automatically saves the model, displays a live animated metric plot, and a progress bar for each epoch.
 
 ![Example of the train loop util](train_util_example.PNG)
+
+## Todo
+
+[ ] - Save best models to allow for easy reloading
