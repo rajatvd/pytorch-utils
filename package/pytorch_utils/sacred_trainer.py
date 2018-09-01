@@ -1,7 +1,7 @@
 
 
 """
-Convenience module for pytorch training and visualization. Uses sacred to 
+Convenience module for pytorch training and visualization. Uses sacred to
 log experiments and visdom for visualization.
 """
 
@@ -30,7 +30,7 @@ def accuracy(scores, labels):
         return acc
 
 def save_model(model, epoch, directory, metrics):
-    """Save the state dict of the model in the directory, 
+    """Save the state dict of the model in the directory,
     with the save name metrics at the given epoch.
 
     epoch: epoch number(<= 3 digits)
@@ -52,19 +52,19 @@ def save_model(model, epoch, directory, metrics):
 def loop(_run,
      model,
      batch_metric_names,
-     train_loader, 
+     train_loader,
      trainOnBatch,
-     optimizer, 
+     optimizer,
 
-     updaters, 
-     save_dir, 
+     updaters,
+     save_dir,
 
      callback=None,
      callback_metric_names=[],
-     val_loader=None, 
+     val_loader=None,
 
-     epochs=10, 
-     save_every=1, 
+     epochs=10,
+     save_every=1,
      start_epoch=1,
      **kwargs,
     ):
@@ -74,19 +74,19 @@ def loop(_run,
      _run: Sacred run instance
 
     model: Model instance to be trained
-    
+
     trainOnBatch: Train on batch function with the following signature:
         trainOnBatch(model, batch, optimizer) -> tuple of batch metrics
     batch_metric_names: Names of the batch metrics returned by trainOnBatch
-    
+
     train_loader: DataLoader which yields batches of training data
-    optimizer: Optimizer instance which is passed to trainOnBatch 
+    optimizer: Optimizer instance which is passed to trainOnBatch
     updaters: List of running metric updaters which aggregate batch metrics per epoch.
-        They should be generator functions which return the running value when 
+        They should be generator functions which return the running value when
         .send is called with a batch value.
-    save_dir: Top level directory in which to save configs, checkpoints and metrics 
+    save_dir: Top level directory in which to save configs, checkpoints and metrics
     of each run
-      
+
     callback=None : Optional callback function, should have the following signature:
         callback(model, val_loader) -> tuple of callback metrics
         Usually used for calculating validation metrics.
@@ -104,16 +104,20 @@ def loop(_run,
             upds = [updater() for updater in updaters]
             [next(u) for u in upds]
 
-            t = tqdm(train_loader, desc=f'Epoch: {e}')  
+            t = tqdm(train_loader, desc=f'Epoch: {e}')
             for i,batch in enumerate(t):
                 # Perform train step
                 batch_metrics = trainOnBatch(model, batch, optimizer)
 
                 # Update running metrics
-                batch_metrics = [upds[i].send(b_metric) 
+                batch_metrics = [upds[i].send(b_metric)
                                     for i,b_metric in enumerate(batch_metrics)]
 
-                t.set_postfix(**dict(zip(batch_metric_names, batch_metrics)))
+
+                postfix = " ".join([f"{name}={value:.4f}"
+                    for name, value in zip(batch_metric_names, batch_metrics)])
+
+                t.set_postfix_str(postfix)
 
             # execute callback
             callback_metrics = ()
@@ -123,13 +127,13 @@ def loop(_run,
             mets = dict(zip(callback_metric_names, callback_metrics))
 
             if len(callback_metrics)!=0:
-                cb_info = "Callback metrics: " + " ".join([f"{name}={val:.6f}" 
+                cb_info = "Callback metrics: " + " ".join([f"{name}={val:.6f}"
                                 for name,val in mets.items()])
                 print(cb_info)
 
             # log metrics
             for name,val in zip(batch_metric_names, batch_metrics):
-                _run.log_scalar(name, val, e)    
+                _run.log_scalar(name, val, e)
             for name,val in zip(callback_metric_names, callback_metrics):
                 _run.log_scalar(name, val, e)
 
@@ -146,7 +150,7 @@ def loop(_run,
 
         # save optimizer state
         fname = os.path.join(
-                    run_dir,                
+                    run_dir,
                     f"optimizer_state_epoch{e:03d}.statedict.pkl"
                 )
         torch.save(optimizer.state_dict(),fname)
