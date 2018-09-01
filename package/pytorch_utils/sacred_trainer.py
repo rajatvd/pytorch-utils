@@ -130,12 +130,13 @@ def loop(_run,
                                     val_loader=val_loader,
                                     batch_metrics_dict=batch_metrics_dict)
 
-            mets = {**dict(zip(callback_metric_names, callback_metrics)),
-                **batch_metrics_dict}
+            callback_metrics_dict = dict(zip(callback_metric_names,
+                                             callback_metrics))
+            mets = {**callback_metrics_dict, **batch_metrics_dict}
 
             if len(callback_metrics)!=0:
                 cb_info = "Callback metrics: " + " ".join([f"{name}={val:.6f}"
-                                for name,val in mets.items()])
+                                for name,val in callback_metrics_dict.items()])
                 print(cb_info)
 
             # log metrics
