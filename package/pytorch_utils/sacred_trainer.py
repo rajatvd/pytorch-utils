@@ -120,13 +120,18 @@ def loop(_run,
 
                 t.set_postfix_str(postfix)
 
+
+            batch_metrics_dict = dict(zip(batch_metric_names, batch_metrics))
+
             # execute callback
             callback_metrics = ()
             if callback != None:
-                callback_metrics = callback(model, val_loader=val_loader)
+                callback_metrics = callback(model,
+                                    val_loader=val_loader,
+                                    batch_metrics_dict=batch_metrics_dict)
 
             mets = {**dict(zip(callback_metric_names, callback_metrics)),
-                **dict(zip(batch_metric_names, batch_metrics))}
+                **batch_metrics_dict}
 
             if len(callback_metrics)!=0:
                 cb_info = "Callback metrics: " + " ".join([f"{name}={val:.6f}"
