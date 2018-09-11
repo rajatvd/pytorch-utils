@@ -23,3 +23,8 @@ Contains a Trainer class. It can be used to call a train loop with a model, Data
 
 ## Integration with sacred
 Also has a `sacred_trainer` module which can be used with a sacred experiment to log metrics and artifacts. Provides a `loop` function which takes a `Run` instance and uses it to log batch and callback metrics, and also saves model weights as checkpoints. Combine it with the [visdom observer](https://github.com/rajatvd/VisdomObserver) to easily visualize your deep learning experiments as well.
+
+## Todo
+
+- [ ] Save best models to allow for easy reloading
+- [ ] Make it easy to continue a run from a previous model checkpoint
