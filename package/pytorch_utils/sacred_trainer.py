@@ -29,24 +29,28 @@ def accuracy(scores, labels):
         acc = correct/total * 100
         return acc
 
-def save_model(model, epoch, directory, metrics):
+def save_model(model, epoch, directory, metrics, filename=None):
     """Save the state dict of the model in the directory,
     with the save name metrics at the given epoch.
 
     epoch: epoch number(<= 3 digits)
     directory: where to save statedict
     metrics: dictionary of metrics to append to save filename
+    filename: if a name is given, it overrides the above created filename
 
     Returns the save file name
     """
     # save state dict
-    filename = f"epoch{epoch:03d}_{getTimeName()}_"
+    postfix = ""
+    if filename is None:
+        filename = f"epoch{epoch:03d}_{getTimeName()}_"
+        postfix = "_".join([f"{name}{val:0.4f}" for name, val in metrics.items()])
 
-    postfix = "_".join([f"{name}{val:0.4f}" for name,val in metrics.items()])
+    filename = os.path.join(directory, filename + postfix + ".statedict.pkl")
 
-    filename = os.path.join(directory, filename+postfix+".statedict.pkl")
-    print(filename)
     torch.save(model.state_dict(), filename)
+    print(f"Saved model at {filename}")
+    
     return filename
 
 def loop(_run,
@@ -146,6 +150,8 @@ def loop(_run,
                 _run.log_scalar(name, val, e)
 
             # Checkpointing
+            fname = save_model(model, e, run_dir, mets,
+                               filename='latest')
             if e%(save_every)==0:
                 fname = save_model(model, e, run_dir, mets)
 #                 _run.add_artifact(fname)
