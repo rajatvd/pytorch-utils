@@ -14,10 +14,11 @@ An extension of matplotlib figures to jupyter notebooks which are rendered using
 ## RNN modules
 Currently contains:
 
-* __WrappedLSTM__ :  a pytorch nn Module which wraps an input and output module around an lstm. The whole module now works solely with packed sequences, and padding is not required.
+* __WrappedLSTM__ :  a pytorch nn Module which wraps an input and output module around an lstm. The whole module now works solely with packed sequences, and padding is not required. (DEPRACTED in favor of WrappedRNN)
+* __WrappedRNN__ : a module which wraps an input and output module around a general RNNBase instance.
 
 ## Train utils
-Contains a Trainer class. It can be used to call a train loop with a model, DataLoader, optimizer, atrainOnBatch function and an epoch callback function to train a model for a given number of epochs. Automatically saves the model, displays a live animated metric plot, and a progress bar for each epoch.
+Contains a Trainer class. It can be used to call a train loop with a model, DataLoader, optimizer, a trainOnBatch function and an epoch callback function to train a model for a given number of epochs. Automatically saves the model, displays a live animated metric plot, and a progress bar for each epoch.
 
 ![Example of the train loop util](train_util_example.PNG)
 
