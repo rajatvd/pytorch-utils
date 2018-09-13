@@ -1,12 +1,13 @@
 from setuptools import *
 
 long_description = """
-A bunch of utilities for making training models easier. Also contains useful modules to make building models easier.
-Designed to be used in a jupyter notebook workflow.
+A bunch of utilities for making training models easier. Also contains useful
+modules to make building models easier. Can be used in a jupyter notebook. Also
+contains a module which integrates with the package `sacred`.
 """
 
 setup(name='pytorch_utils',
-		version='0.3',
+		version='0.4',
 		description='Utilities for training and building models in pytorch',
 		long_description=long_description,
 		author='Rajat Vadiraj Dwaraknath',
