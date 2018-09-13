@@ -2,6 +2,11 @@
 Some utilities for building models in pytorch.
 
 ## Installation
+Install using pip:  
+`pip install pytorch-utils`
+
+OR
+
 First, clone this repository using   
 `git clone https://github.com/rajatvd/PytorchUtils/`  
 
