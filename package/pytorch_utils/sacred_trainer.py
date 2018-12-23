@@ -50,7 +50,7 @@ def save_model(model, epoch, directory, metrics, filename=None):
 
     torch.save(model.state_dict(), filename)
     print(f"Saved model at {filename}")
-    
+
     return filename
 
 def loop(_run,
@@ -100,7 +100,7 @@ def loop(_run,
     """
     run_dir = os.path.join(save_dir, str(_run._id))
     os.makedirs(run_dir, exist_ok=True)
-
+    mets = {}
     try:
         for e in range(start_epoch,start_epoch+epochs,1):
 
