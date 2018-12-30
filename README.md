@@ -19,7 +19,7 @@ An extension of matplotlib figures to jupyter notebooks which are rendered using
 ## RNN modules
 Currently contains:
 
-* __WrappedLSTM__ :  a pytorch nn Module which wraps an input and output module around an lstm. The whole module now works solely with packed sequences, and padding is not required. (DEPRACTED in favor of WrappedRNN)
+* __WrappedLSTM__ :  a pytorch nn Module which wraps an input and output module around an lstm. The whole module now works solely with packed sequences, and padding is not required. (DEPRACATED in favor of WrappedRNN)
 * __WrappedRNN__ : a module which wraps an input and output module around a general RNNBase instance.
 
 ## Train utils
