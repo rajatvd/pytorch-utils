@@ -188,6 +188,3 @@ CLASSIFICATION = dict(
     callback_metric_names=['val_loss', 'val_acc'],
     updaters=[averager, averager],
 )
-
-# utilities for sacred experiments:
-
