@@ -1,5 +1,3 @@
-
-
 """
 Convenience module for pytorch training and visualization. Uses sacred to
 log experiments and visdom for visualization.
@@ -14,11 +12,16 @@ import traceback
 from pytorch_utils.updaters import *
 from tqdm import tqdm
 
+# %%
+
 def getTimeName():
-    """Return the current time in format <day>-<month>_<hour><minute> for use in filenames."""
+    """Return the current time in format <day>-<month>_<hour><minute>
+    for use in filenames."""
     from datetime import datetime
     t = datetime.now()
     return "{:02d}-{:02d}_{:02d}{:02d}".format(t.day,t.month,t.hour,t.minute)
+
+# %%
 
 def accuracy(scores, labels):
     """Return accuracy percentage. Assumes scores are in dim -1."""
@@ -29,11 +32,13 @@ def accuracy(scores, labels):
         acc = correct/total * 100
         return acc
 
+# %%
+
 def save_model(model, epoch, directory, metrics, filename=None):
     """Save the state dict of the model in the directory,
     with the save name metrics at the given epoch.
 
-    epoch: epoch number(<= 3 digits)
+    epoch: epoch number(<= 4 digits)
     directory: where to save statedict
     metrics: dictionary of metrics to append to save filename
     filename: if a name is given, it overrides the above created filename
@@ -43,7 +48,7 @@ def save_model(model, epoch, directory, metrics, filename=None):
     # save state dict
     postfix = ""
     if filename is None:
-        filename = f"epoch{epoch:03d}_{getTimeName()}_"
+        filename = f"epoch{epoch:04d}_{getTimeName()}_"
         postfix = "_".join([f"{name}{val:0.4f}" for name, val in metrics.items()])
 
     filename = os.path.join(directory, filename + postfix + ".statedict.pkl")
@@ -52,6 +57,8 @@ def save_model(model, epoch, directory, metrics, filename=None):
     print(f"Saved model at {filename}")
 
     return filename
+
+# %%
 
 def loop(_run,
      model,
@@ -74,8 +81,8 @@ def loop(_run,
      **kwargs,
     ):
     """
-    Arguments:
-    -------------------
+    Arguments
+    ---------
      _run: Sacred run instance
 
     model: Model instance to be trained
@@ -174,8 +181,63 @@ def loop(_run,
         fname = save_model(model, e, run_dir, mets)
 #         _run.add_artifact(fname)
 
+# %%
+
 CLASSIFICATION = dict(
     batch_metric_names=['loss', 'acc'],
     callback_metric_names=['val_loss', 'val_acc'],
     updaters=[averager, averager],
 )
+
+# utilities for sacred experiments:
+# %%
+
+def remove_key(d, key):
+    """Remove the key from the given dictionary and all its sub dictionaries.
+    Mutates the dictionary.
+
+    Parameters
+    ----------
+    d : dict
+        Input dictionary.
+    key : type
+        Key to recursively remove.
+
+    Returns
+    -------
+    None
+    """
+    for k in list(d.keys()):
+        if isinstance(d[k], dict):
+            remove_key(d[k], key)
+        elif k == key:
+            del d[k]
+
+def read_config(run_dir):
+    """Read the config json from the given run directory"""
+    with open(os.path.join(run_dir, 'config.json')) as file:
+        config = json.loads(file.read())
+        remove_key(config, key='__doc__')
+
+    return config
+
+def get_model_path(run_dir, epoch):
+    """Get the path to the saved model state_dict with the given epoch number.
+    If epoch is 'latest', the latest model state dict path will be returned.
+    """
+    if epoch == 'latest':
+        return os.path.join(run_dir, 'latest.statedict.pkl')
+
+    filenames = os.listdir(run_dir)
+
+    for filename in filenames:
+        if 'statedict' not in filename:
+            continue
+        if filename.startswith('epoch'):
+            number = int(filename[len('epoch'):].split('_')[0])
+            if epoch == number:
+                return os.path.join(run_dir, filename)
+
+    raise ValueError(f"No statedict found with epoch number '{epoch}'")
+
+# %%
