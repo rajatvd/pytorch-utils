@@ -28,7 +28,20 @@ def remove_key(d, key):
             del d[k]
 
 def read_config(run_dir):
-    """Read the config json from the given run directory"""
+    """Read the config.json from the given run directory. Removes __doc__
+    entries and returns a config dict.
+
+    Parameters
+    ----------
+    run_dir : str
+        Path to run directory.
+
+    Returns
+    -------
+    dict
+        Config dict with __doc__ entries removed.
+
+    """
     with open(os.path.join(run_dir, 'config.json')) as file:
         config = json.loads(file.read())
         remove_key(config, key='__doc__')
@@ -38,6 +51,18 @@ def read_config(run_dir):
 def get_model_path(run_dir, epoch):
     """Get the path to the saved model state_dict with the given epoch number.
     If epoch is 'latest', the latest model state dict path will be returned.
+
+    Parameters
+    ----------
+    run_dir : str
+        Path to run directory.
+    epoch : type
+        Epoch number of model to get.
+
+    Returns
+    -------
+    str
+        Path to model state_dict file.
     """
     if epoch == 'latest':
         return os.path.join(run_dir, 'latest.statedict.pkl')
