@@ -7,7 +7,7 @@ contains a module which integrates with the package `sacred`.
 """
 
 setup(name='pytorch_utils',
-	  version='0.5.2',
+	  version='0.5.3',
 	  description='Utilities for training and building models in pytorch',
 	  long_description=LONG_DESC,
 	  author='Rajat Vadiraj Dwaraknath',
