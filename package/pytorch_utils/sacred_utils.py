@@ -2,7 +2,12 @@
 
 import os
 import json
-import importlib.util as iutil
+import logging
+import sys
+import importlib
+from importlib.abc import MetaPathFinder
+from importlib.util import spec_from_file_location
+
 
 # %%
 
@@ -81,8 +86,41 @@ def get_model_path(run_dir, epoch):
 
 # %%
 
+class SacredFinder(MetaPathFinder):
+    """MetaPathFinder to perform imports based on sources used by sacred runs.
+    Loads list of sources from the run.json of the given run_dir and tries to
+    import the sources used in this run. Does not work for packages currently.
+
+    Parameters
+    ----------
+    run_dir : str
+        Path of run directory. Assumes _sources is present in the parent directory.
+    _log : Logger
+        Logger instance for logging.
+    """
+    def __init__(self, run_dir, _log=logging.getLogger("sacred_finder")):
+        run_json_file = os.path.join(run_dir, "run.json")
+        with open(run_json_file) as file:
+            run = json.loads(file.read())
+
+        self.sources = run['experiment']['sources']
+        self.parent_dir = os.path.join(os.path.split(run_dir)[0])
+        self._log = _log
+
+    def find_spec(self, fullname, path, target=None):
+        for source in self.sources:
+            if source[0] == fullname+".py":
+                module_location = os.path.join(self.parent_dir, source[1])
+                self._log.info(f"Imported {fullname} from {module_location}")
+                return spec_from_file_location(fullname, location=module_location)
+
+# %%
+
 def import_source(run_dir, module_name):
     """Import a module used in a sacred run, from the "_sources" directory.
+    Manages the dependencies between multiple sources of the same run using a
+    MetaPathFinder. Does not work for packages (including namespace packages)
+    currently.
 
     Parameters
     ----------
@@ -97,21 +135,8 @@ def import_source(run_dir, module_name):
         Module which was used in the run.
 
     """
-    run_json_file = os.path.join(run_dir, "run.json")
-    with open(run_json_file) as file:
-        run = json.loads(file.read())
-
-    sources = run['experiment']['sources']
-    for source in sources:
-        if source[0] == module_name+".py":
-            source_file = os.path.split(source[1])[-1]
-            break
-
-    path_to_source = os.path.join(os.path.split(run_dir)[0], "_sources", source_file)
-
-    spec = iutil.spec_from_file_location(module_name,
-                                         location=path_to_source)
-    module = iutil.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
+    finder = SacredFinder(run_dir)
+    sys.meta_path.insert(0, finder)
+    module = importlib.import_module(module_name)
+    del sys.meta_path[0]
     return module
