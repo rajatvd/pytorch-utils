@@ -53,7 +53,12 @@ def save_model(model, epoch, directory, metrics, filename=None):
 
     filename = os.path.join(directory, filename + postfix + ".statedict.pkl")
 
-    torch.save(model.state_dict(), filename)
+    if isinstance(model, nn.DataParallel):
+        state = model.module.state_dict()
+    else:
+        state = model.state_dict()
+
+    torch.save(state, filename)
     print(f"Saved model at {filename}")
 
     return filename
