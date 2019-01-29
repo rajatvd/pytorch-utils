@@ -166,7 +166,7 @@ def loop(_run,
                                filename='latest')
             if e%(save_every)==0:
                 fname = save_model(model, e, run_dir, mets)
-#                 _run.add_artifact(fname)
+                _run.add_artifact(fname)
 
 
     except:
@@ -180,11 +180,11 @@ def loop(_run,
                     f"optimizer_state_epoch{e:03d}.statedict.pkl"
                 )
         torch.save(optimizer.state_dict(),fname)
-#         _run.add_artifact(fname)
+        _run.add_artifact(fname)
 
         # save model dict
         fname = save_model(model, e, run_dir, mets)
-#         _run.add_artifact(fname)
+        _run.add_artifact(fname)
 
 # %%
 
