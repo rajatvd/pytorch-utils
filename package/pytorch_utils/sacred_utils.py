@@ -1,4 +1,4 @@
-"""Utilities for using sacred experiments with FileStorageObservers"""
+"""Utilities for using sacred with FileStorage and MongoObservers."""
 
 import os
 import json
@@ -8,11 +8,15 @@ import importlib
 from importlib.abc import MetaPathFinder
 from importlib.util import spec_from_file_location
 
+from sacred.commandline_options import CommandLineOption
+from sacred.observers import MongoObserver
+from pymongo import MongoClient
+
 
 # %%
-
 def remove_key(d, key):
     """Remove the key from the given dictionary and all its sub dictionaries.
+
     Mutates the dictionary.
 
     Parameters
@@ -25,6 +29,7 @@ def remove_key(d, key):
     Returns
     -------
     None
+
     """
     for k in list(d.keys()):
         if isinstance(d[k], dict):
@@ -32,9 +37,11 @@ def remove_key(d, key):
         elif k == key:
             del d[k]
 
+
 def read_config(run_dir):
-    """Read the config.json from the given run directory. Removes __doc__
-    entries and returns a config dict.
+    """Read the config.json from the given run directory.
+
+    Removes __doc__ entries and returns a config dict.
 
     Parameters
     ----------
@@ -53,8 +60,10 @@ def read_config(run_dir):
 
     return config
 
+
 def get_model_path(run_dir, epoch):
     """Get the path to the saved model state_dict with the given epoch number.
+
     If epoch is 'latest', the latest model state dict path will be returned.
 
     Parameters
@@ -68,6 +77,7 @@ def get_model_path(run_dir, epoch):
     -------
     str
         Path to model state_dict file.
+
     """
     if epoch == 'latest':
         return os.path.join(run_dir, 'latest.statedict.pkl')
@@ -86,19 +96,25 @@ def get_model_path(run_dir, epoch):
 
 # %%
 
+
 class SacredFinder(MetaPathFinder):
     """MetaPathFinder to perform imports based on sources used by sacred runs.
+
     Loads list of sources from the run.json of the given run_dir and tries to
     import the sources used in this run. Does not work for packages currently.
 
     Parameters
     ----------
     run_dir : str
-        Path of run directory. Assumes _sources is present in the parent directory.
+        Path of run directory. Assumes _sources is present in
+        the parent directory.
     _log : Logger
         Logger instance for logging.
+
     """
+
     def __init__(self, run_dir, _log=logging.getLogger("sacred_finder")):
+        """See class docstring."""
         run_json_file = os.path.join(run_dir, "run.json")
         with open(run_json_file) as file:
             run = json.loads(file.read())
@@ -108,16 +124,19 @@ class SacredFinder(MetaPathFinder):
         self._log = _log
 
     def find_spec(self, fullname, path, target=None):
+        """Get import spec from sources used by run."""
         for source in self.sources:
             if source[0] == fullname+".py":
                 module_location = os.path.join(self.parent_dir, source[1])
                 self._log.info(f"Imported {fullname} from {module_location}")
-                return spec_from_file_location(fullname, location=module_location)
+                return spec_from_file_location(fullname,
+                                               location=module_location)
+
 
 # %%
-
 def import_source(run_dir, module_name):
     """Import a module used in a sacred run, from the "_sources" directory.
+
     Manages the dependencies between multiple sources of the same run using a
     MetaPathFinder. Does not work for packages (including namespace packages)
     currently.
@@ -140,3 +159,24 @@ def import_source(run_dir, module_name):
     module = importlib.import_module(module_name)
     del sys.meta_path[0]
     return module
+
+
+# %%
+class AuthMongoDbOption(CommandLineOption):
+    """Custom MongoObserver option with authentication.
+
+    The authentication json file should contain two keys:
+        'client_kwargs': directly passed to MongoClient
+        'db_name': name of database to store runs (usually sacred)"""
+
+    arg = 'AUTH_FILE'
+    short_flag = 'M'
+    arg_description = """Path to authentication json file."""
+
+    @classmethod
+    def apply(cls, args, run):
+        with open(args) as f:
+            auth = json.loads(f.read())
+        client = MongoClient(**auth['client_kwargs'])
+        mongo = MongoObserver.create(db_name=auth['db_name'], client=client)
+        run.observers.append(mongo)

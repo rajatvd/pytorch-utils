@@ -7,12 +7,12 @@ contains a module which integrates with the package `sacred`.
 """
 
 setup(name='pytorch_utils',
-	  version='0.5.4',
+	  version='0.5.5',
 	  description='Utilities for training and building models in pytorch',
 	  long_description=LONG_DESC,
 	  author='Rajat Vadiraj Dwaraknath',
 	  url='https://github.com/rajatvd/PytorchUtils',
-	  install_requires=['ipython', 'sacred', 'tqdm'],
+	  install_requires=['ipython', 'sacred', 'tqdm', 'pymongo'],
 	  author_email='rajatvd@gmail.com',
 	  license='MIT',
 	  packages=find_packages(),
